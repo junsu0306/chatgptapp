@@ -1,0 +1,163 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+
+
+android {
+    compileSdk 33
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/proguard/androidx-annotations.pro']
+        }
+    }
+
+
+    defaultConfig {
+        applicationId "com.smartglassesmanager.androidsmartphone"
+        minSdk 28
+        targetSdk 33
+        versionCode 3
+        versionName "0.1"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            applicationIdSuffix ".debug" //so we can have both release and debug on the same phone
+        }
+    }
+
+
+    sourceSets {
+        main {
+            assets.srcDirs += "$buildDir/generated/assets"
+        }
+    }
+    namespace 'com.smartglassesmanager.androidsmartphone'
+    androidResources {
+        noCompress 'tflite'
+    }
+}
+
+ext {
+    kotlinVersion = '1.6.21'  // 최신 Kotlin 버전으로 업데이트하세요
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    testImplementation 'junit:junit:4.+'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+
+
+    implementation "androidx.concurrent:concurrent-futures:1.0.0-alpha03"
+    implementation "androidx.lifecycle:lifecycle-common:2.2.0"
+    implementation "androidx.annotation:annotation:1.1.0"
+    implementation "androidx.appcompat:appcompat:1.1.0"
+    implementation "androidx.constraintlayout:constraintlayout:2.1.0"
+    implementation "androidx.core:core:1.1.0-rc03"
+    implementation "androidx.legacy:legacy-support-v4:1.0.0"  // 수정된 부분
+    implementation "androidx.recyclerview:recyclerview:1.1.0-beta02"
+    implementation "androidx.test.espresso:espresso-core:3.1.1"
+    implementation "com.github.bumptech.glide:glide:4.11.0"
+    implementation "com.google.android.material:material:1.6.0-alpha01"
+    implementation "com.google.code.findbugs:jsr305:3.0.2"
+    implementation "com.google.flogger:flogger-system-backend:0.3.1"
+    implementation "com.google.flogger:flogger:0.3.1"
+    implementation "com.google.guava:listenablefuture:1.0"
+    implementation "junit:junit:4.12"
+    implementation "org.hamcrest:hamcrest-library:1.3"
+
+    implementation "org.java-websocket:Java-WebSocket:1.5.2"
+    implementation "io.reactivex.rxjava3:rxandroid:3.0.0"
+    implementation "io.reactivex.rxjava3:rxjava:3.0.0"
+    implementation "com.google.android.gms:play-services-tasks:18.0.0"
+    implementation "com.google.android.gms:play-services-location:18.0.0"
+    implementation "com.google.code.gson:gson:2.8.6"
+
+    // ROOM components (직접 버전 명시)
+    implementation "androidx.room:room-runtime:2.4.2"
+    annotationProcessor "androidx.room:room-compiler:2.4.2"
+    androidTestImplementation "androidx.room:room-testing:2.4.2"
+
+    // Lifecycle components (직접 버전 명시)
+    implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
+    annotationProcessor "androidx.lifecycle:lifecycle-compiler:2.2.0"
+    implementation "com.google.guava:guava:28.1-android"
+
+    // VOSK ASR
+    implementation 'net.java.dev.jna:jna:5.8.0@aar'
+    implementation "com.alphacephei:vosk-android:0.3.34@aar"
+
+    // Navigation
+    implementation "androidx.navigation:navigation-fragment:2.0.0"
+    implementation "androidx.navigation:navigation-ui:2.0.0"
+    implementation "androidx.navigation:navigation-runtime:2.0.0"
+    implementation "androidx.fragment:fragment:1.2.0"
+
+    // Fuzzy string matching
+    implementation "info.debatty:java-string-similarity:2.0.0"
+
+    // java.util.time backport
+    implementation "org.threeten:threetenbp:1.5.2"
+
+    // TensorFlow Lite dependencies
+    implementation 'org.tensorflow:tensorflow-lite:2.7.0'
+    implementation 'org.tensorflow:tensorflow-lite-gpu:2.7.0'
+    implementation 'org.tensorflow:tensorflow-lite-support:0.3.0'
+
+    // DocumentFile and ExitInterface
+    implementation "androidx.documentfile:documentfile:1.0.1"
+    implementation "androidx.exifinterface:exifinterface:1.3.3"
+
+    // CSVs
+    implementation "com.opencsv:opencsv:4.6"
+
+    // HTTP(s) lib
+    implementation "com.android.volley:volley:1.2.1"
+
+    // EventBus, greenrobot
+    implementation("org.greenrobot:eventbus:3.3.1")
+
+    // ActiveLook SDK
+    implementation 'com.github.activelook:android-sdk:v4.4.0'
+
+    // JSON (de/)serialization
+    implementation 'com.google.code.gson:gson:2.10.1'
+
+    // Custom SGMLib library
+    implementation project (":SGMLib")
+
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+}
+
+// VOSK ASR prep models - need one for each language
+tasks.register('genUUID_en') {
+    def uuid = UUID.randomUUID().toString()
+    def odir = file("$buildDir/generated/assets/model-en-us")
+    def ofile = file("$odir/uuid")
+    doLast {
+        mkdir odir
+        ofile.text = uuid
+    }
+}
+tasks.register('genUUID_fr') {
+    def uuid = UUID.randomUUID().toString()
+    def odir = file("$buildDir/generated/assets/model-fr-small")
+    def ofile = file("$odir/uuid")
+    doLast {
+        mkdir odir
+        ofile.text = uuid
+    }
+}
+
+preBuild.dependsOn(genUUID_en)
+preBuild.dependsOn(genUUID_fr)
+

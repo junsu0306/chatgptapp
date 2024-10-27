@@ -1,0 +1,16 @@
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        jcenter() // Warning: this repository is going to shut down soon
+        maven { url 'https://jitpack.io' }
+    }
+}
+
+
+rootProject.name = "Smart Glasses Manager"
+include ':app'
+
+include ':SGMLib'
+project(':SGMLib').projectDir = new File('../../SGM_android_library/SGMLib')
